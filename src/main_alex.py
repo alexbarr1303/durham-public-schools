@@ -2,7 +2,7 @@
 # - parcels from Durham Open
 # - join parcels clean - https://drive.google.com/drive/folders/1zsoxuwzhKcS-0NX_xAo2LdqvsTuFceTb?usp=drive_link
 #
-# from ..src.dataloader import get_parcels, get_du_est
+# from ..src.dataloader_alex import get_parcels, get_du_est
 # join both dfs
 
 
