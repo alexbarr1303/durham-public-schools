@@ -1,0 +1,64 @@
+---
+title: "DPS"
+output: pdf_document
+date: "2024-06-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# load packages and set API key
+library(tidyverse)
+library(tidycensus)
+library(readr)
+library(sf)
+
+source('./DataGathering.R')
+```
+
+```{r}
+
+load_variables(2022, "acs5", cache = TRUE) %>% view()
+```
+
+# Load Data
+
+```{r}
+
+acs1822_t <- make_acs_table_t(2022)
+acs1822_bg <- make_acs_table_bg(2022)
+```
+
+```{r}
+
+acs1822_t_subset <- acs1822_t %>% 
+  select(GEOID, 
+         estimate_rent_total, 
+         moe_rent_total, 
+         estimate_median_house_value, 
+         estimate_median_year_structure_build,
+         estimate_housing_units,
+         pct_vacant,
+         pct_owner_occupied,
+         geometry)
+
+acs1822_bg_subset <- acs1822_bg %>% 
+  select(GEOID, 
+         estimate_rent_total, 
+         moe_rent_total, 
+         estimate_median_house_value, 
+         estimate_median_year_structure_build,
+         estimate_housing_units,
+         pct_vacant,
+         pct_owner_occupied,
+         geometry)
+```
+
+```{r}
+
+acs1822_t_subset_sf <- st_sf(acs1822_t_subset)
+acs1822_bg_subset_sf <- st_sf(acs1822_bg_subset)
+
+st_write(acs1822_t_subset_sf, '../data/census_data/census_tract/acs1822_t_subset.shp')
+st_write(acs1822_bg_subset_sf, '../data/census_data/census_block_group/acs1822_bg_subset.shp')
+```
