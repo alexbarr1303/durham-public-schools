@@ -1,13 +1,15 @@
 import pandas as pd
 import geopandas as gpd
 from dataloader_alex import get_parcels, get_du_est, add_columns_from_csv
-
 def main():
     # Load the parcels data
     parcels_df = get_parcels()
     
     # Load the du_est data
     du_df = get_du_est()
+
+    parcels_df['REID'] = parcels_df['REID'].astype(str)
+    du_df['REID'] = du_df['REID'].astype(str)
     
     # Merge the dataframes
     merged_gdf = add_columns_from_csv(parcels_df, du_df)
