@@ -6,12 +6,12 @@ PATH_DU_EST = r"../data/parcels_cleanup.csv"
 
 
 def get_parcels():
-    parcels_df = gpd.read_file("../data/extracted_parcels")
+    parcels_df = gpd.read_file(PATH_PARCELS)
     return parcels_df
 
 
 def get_du_est():
-    du_df = pd.read_csv("../data/parcels_cleanupNEW.csv")
+    du_df = pd.read_csv(PATH_DU_EST)
     return du_df
 
 def add_columns_from_csv(gdf, csv):
