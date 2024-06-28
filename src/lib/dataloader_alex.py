@@ -1,15 +1,22 @@
 import pandas as pd
 import geopandas as gpd
 
-PATH_PARCELS = r"../data/extracted_parcels/Parcels_NEW.shp"
+PATH_PARCELS = r"../data/extracted_parcels"
 PATH_DU_EST = r"../data/parcels_cleanup.csv"
 
 
 def get_parcels():
-    result_df = pd.read_file("../data/extracted_parcels/Parcels_NEW.shp")
-    return result_df
+    parcels_df = gpd.read_file("../data/extracted_parcels")
+    return parcels_df
 
 
 def get_du_est():
-    result_df = pd.read_csv("../data/parcels_cleanup.csv")
-    return result_df
+    du_df = pd.read_csv("../data/parcels_cleanupNEW.csv")
+    return du_df
+
+def add_columns_from_csv(gdf, csv):
+
+    gdf = gdf.merge(csv[['REID', 'designation', 'housing_type', 'du_est_parcels']],   
+                    left_on='REID', right_on='REID', how='left')
+    
+    return gdf

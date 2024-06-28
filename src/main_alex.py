@@ -1,9 +1,23 @@
-# download datasets:
-# - parcels from Durham Open
-# - join parcels clean - https://drive.google.com/drive/folders/1zsoxuwzhKcS-0NX_xAo2LdqvsTuFceTb?usp=drive_link
-#
-# from ..src.dataloader_alex import get_parcels, get_du_est
-# join both dfs
+import pandas as pd
+import geopandas as gpd
+from dataloader_alex import get_parcels, get_du_est, add_columns_from_csv
+
+def main():
+    # Load the parcels data
+    parcels_df = get_parcels()
+    
+    # Load the du_est data
+    du_df = get_du_est()
+    
+    # Merge the dataframes
+    merged_gdf = add_columns_from_csv(parcels_df, du_df)
+    
+    return merged_gdf
+
+if __name__ == "__main__":
+    merged_gdf = main()
+    # Print or save the merged GeoDataFrame as needed
+    print(merged_gdf.head())
 
 
 # call R script from Python
