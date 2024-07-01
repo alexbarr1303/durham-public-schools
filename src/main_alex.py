@@ -7,9 +7,6 @@ def main():
     
     # Load the du_est data
     du_df = get_du_est()
-
-    parcels_df['REID'] = parcels_df['REID'].astype(str)
-    du_df['REID'] = du_df['REID'].astype(str)
     
     # Merge the dataframes
     merged_gdf = add_columns_from_csv(parcels_df, du_df)
