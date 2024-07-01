@@ -259,7 +259,10 @@ make_acs_table_t = function(year){
     rename_with(~ case_when(.x %in% c("geometry") ~ .x, #apply variable stubs
                             # TRUE ~ paste0(.x, get_acs_stub(year))), 
                             TRUE ~ .x), 
-                .cols = everything()) 
+                .cols = everything())
+    
+    table$geometry = NULL 
+
   return(table)
 }
 
@@ -333,6 +336,8 @@ make_acs_table_bg = function(year){
                             # TRUE ~ paste0(.x, get_acs_stub(year))), 
                             TRUE ~ .x), 
                 .cols = everything()) 
+
+  table$geometry = NULL 
   return(table)
 }
 

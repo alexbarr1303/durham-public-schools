@@ -1,19 +1,23 @@
-# download datasets:
-# - parcels from Durham Open
-# - join parcels clean - https://drive.google.com/drive/folders/1zsoxuwzhKcS-0NX_xAo2LdqvsTuFceTb?usp=drive_link
-#
-# from ..src.dataloader import get_parcels, get_du_est
-# join both dfs
+# functions to load data
+from lib.dataloader_alex import get_parcels, get_du_est, add_columns_from_csv
+
+# get functions to get the census data by tract and bg
+from lib.census import make_acs_table_t_r, make_acs_table_bg_r
 
 
-# call R script from Python
-# get the census data by tract and bg in return
-# source('/data_gathering.R')
-# census_by_bg, census_by_t
+import rpy2.robjects as robjects
+from rpy2.robjects import pandas2ri
+from rpy2.robjects.conversion import localconverter
 
 
-# Join the census data by the midpoint spatal join rule
-# join census with part 1 df
+acs_table_t = make_acs_table_t_r(2020)
+acs_table_bg = make_acs_table_bg_r(2020)
+
+
+# Convert the R DataFrame to a pandas DataFrame
+with localconverter(robjects.default_converter + pandas2ri.converter):
+    table_t = robjects.conversion.rpy2py(make_acs_table_t_r)
+    table_bg = robjects.conversion.rpy2py(make_acs_table_bg_r)
 
 
 # aggregation
