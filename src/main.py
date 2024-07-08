@@ -64,6 +64,7 @@ if __name__ == "__main__":
 
     # Calculations ============================================================
     base_dataset = clean_analytic_dataset(base_dataset)
+
     base_dataset = process_data(base_dataset)
 
-    base_dataset.to_csv("test.csv")
+    base_dataset.to_csv("../data/test.csv")
