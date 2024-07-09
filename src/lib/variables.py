@@ -1,5 +1,4 @@
 def process_data(df):
-
     # Calculate unit value and add as a new column
     df["unit_val"] = df["TOTAL_PROP_VALUE"] / df["du_est_final"]
 
@@ -66,4 +65,59 @@ def process_data(df):
     # Merge unit_val_cat_multi column into the original dataframe
     df = df.merge(df_multi[["REID", "unit_val_cat_multi"]], on="REID", how="left")
 
+    # Group by pu_2324_848 (Planning Unit)
+    pu_avg = df.groupby('pu_2324_848').agg({
+        'unit_val': 'mean',
+        'unit_val_cat_single': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan,
+        'unit_val_cat_multi': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan
+    }).reset_index()
+
+    # Rename columns for PUs
+    pu_avg.columns = ['pu_2324_848', 'unit_val_avg_pu2020', 'unit_val_cat_single_avg_pu2020', 'unit_val_cat_multi_avg_pu2020']
+
+    # Merge PU averages back to df
+    df = pd.merge(df, pu_avg, on='pu_2324_848', how='left')
+
+   # Group by geo_id_b2020 (block)
+    block_avg = df.groupby('geo_id_b2020').agg({
+        'unit_val': 'mean',
+        'unit_val_cat_single': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan,
+        'unit_val_cat_multi': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan
+    }).reset_index()
+
+    # Rename columns for blocks
+    block_avg.columns = ['geo_id_b2020', 'unit_val_avg_b2020', 'unit_val_cat_single_avg_b2020', 'unit_val_cat_multi_avg_b2020']
+
+    # Merge block averages back to df
+    df = pd.merge(df, block_avg, on='geo_id_b2020', how='left')
+
+    # Group by geo_id_bg2020 (block group)
+    block_group_avg = df.groupby('geo_id_bg2020').agg({
+        'unit_val': 'mean',
+        'unit_val_cat_single': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan,
+        'unit_val_cat_multi': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan
+    }).reset_index()
+
+    # Rename columns for block groups
+    block_group_avg.columns = ['geo_id_bg2020', 'unit_val_avg_bg2020', 'unit_val_cat_single_avg_bg2020', 'unit_val_cat_multi_avg_bg2020']
+
+    # Merge block group averages back to df
+    df = pd.merge(df, block_group_avg, on='geo_id_bg2020', how='left')
+
+    # Group by geo_id_t2020 (tract)
+    tract_avg = df.groupby('geo_id_t2020').agg({
+        'unit_val': 'mean',
+        'unit_val_cat_single': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan,
+        'unit_val_cat_multi': lambda x: round(x.mean()) if not np.isnan(x.mean()) else np.nan
+    }).reset_index()
+
+    # Rename columns for tracts
+    tract_avg.columns = ['geo_id_t2020', 'unit_val_avg_t2020', 'unit_val_cat_single_avg_t2020', 'unit_val_cat_multi_avg_t2020']
+
+    # Merge tract averages back to df
+    df = pd.merge(df, tract_avg, on='geo_id_t2020', how='left')
+
     return df
+
+
+
