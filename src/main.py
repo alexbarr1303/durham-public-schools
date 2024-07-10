@@ -26,9 +26,10 @@ class CONFIG:
 
 
 if __name__ == "__main__":
-
+    import os
+    print(os.getcwd())
     # CENSUS ==================================================================
-    robjects.r("source('src/lib/DataGathering.r')")
+    robjects.r("source('src/DataGathering.R')")
 
     make_acs_table_t_r = robjects.globalenv["make_acs_table_t"]
     make_acs_table_bg_r = robjects.globalenv["make_acs_table_bg"]
