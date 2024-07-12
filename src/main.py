@@ -27,9 +27,10 @@ class CONFIG:
 
 if __name__ == "__main__":
     import os
+
     print(os.getcwd())
     # CENSUS ==================================================================
-    robjects.r("source('src/DataGathering.R')")
+    robjects.r("source('src/lib/DataGathering.R')")
 
     make_acs_table_t_r = robjects.globalenv["make_acs_table_t"]
     make_acs_table_bg_r = robjects.globalenv["make_acs_table_bg"]
@@ -68,4 +69,4 @@ if __name__ == "__main__":
 
     base_dataset = process_data(base_dataset)
 
-    base_dataset.to_csv("../data/test.csv")
+    base_dataset.to_file("data/dps_data/base_dataset.shp")
