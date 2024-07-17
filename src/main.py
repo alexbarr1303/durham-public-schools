@@ -1,11 +1,10 @@
 import os
 import geopandas as gpd
-import pandas as pd
 import fiona
-
 
 # functions to run R code for fetching census data
 import rpy2.robjects as robjects
+import pandas as pd
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
 
@@ -110,7 +109,7 @@ if __name__ == "__main__":
     gdb_path = os.path.join(CONFIG.OUTPUT_DIR, CONFIG.OUTPUT_GDB_NAME)
 
     # CENSUS ==================================================================
-    robjects.r("source('src/lib/DataGathering.R')")
+    robjects.r("source('src/lib/DataGathering.r')")
 
     make_acs_table_t_r = robjects.globalenv["make_acs_table_t"]
     make_acs_table_bg_r = robjects.globalenv["make_acs_table_bg"]
@@ -131,7 +130,7 @@ if __name__ == "__main__":
     durham_open = get_parcels(CONFIG.PATH_PARCELS)
     parcels_clean = get_du_est(CONFIG.PATH_DU_EST)
 
-    # Build the base dataset ==================================================
+    # Joins ===================================================================
 
     base_dataset = add_columns_from_csv(durham_open, parcels_clean)
 
@@ -143,6 +142,8 @@ if __name__ == "__main__":
     # adding columns from census data
     base_dataset = add_columns_from_census(base_dataset, acs_table_t, "t")
     base_dataset = add_columns_from_census(base_dataset, acs_table_bg, "bg")
+
+    # Calculations ============================================================
     base_dataset = clean_analytic_dataset(base_dataset)
     base_dataset = process_data(base_dataset)
 
@@ -184,14 +185,9 @@ if __name__ == "__main__":
         # ensure the datatypes of the geo id columns match before merging
         mapped_geo_col_name = CONFIG.layer_mapping[geo_layer]
         gdf.dropna(subset=mapped_geo_col_name, inplace=True)
-        # gdf[mapped_geo_col_name] = gdf[mapped_geo_col_name].astype(int)
         gdf = safe_convert_to_int(gdf, mapped_geo_col_name)
 
         base_dataset_agg.dropna(subset=mapped_geo_col_name, inplace=True)
-        # base_dataset_agg[mapped_geo_col_name] = base_dataset_agg[
-        #     mapped_geo_col_name
-        # ].astype(int)
-
         base_dataset_agg = safe_convert_to_int(base_dataset_agg, mapped_geo_col_name)
 
         merged_gdf = gdf.merge(base_dataset_agg, how="left", on=mapped_geo_col_name)
@@ -220,7 +216,7 @@ if __name__ == "__main__":
 
         # Write the merged GeoDataFrame to a new GDB as a new layer using fiona
         with fiona.open(
-            gdb_path,
+            os.path.join(CONFIG.OUTPUT_DIR, CONFIG.OUTPUT_GDB_NAME),
             "w",
             driver="OpenFileGDB",
             schema=schema,
@@ -240,5 +236,7 @@ if __name__ == "__main__":
                 )
 
         # Inspect the written layer
-        print(f"Layer '{geo_layer}' written to {gdb_path}")
+        print(
+            f"Layer '{geo_layer}' written to {os.path.join(CONFIG.OUTPUT_DIR, CONFIG.OUTPUT_GDB_NAME)}"
+        )
         pass
