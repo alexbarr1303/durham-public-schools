@@ -28,8 +28,7 @@ from lib.variables import process_data
 class CONFIG:
     CENSUS_YEAR = 2020
     PATH_PARCELS = r"data/Parcels_1"
-    PATH_DU_EST = r"data/parcels_clean_duest_stu_spjoin_20240426.csv"
-
+    PATH_DU_EST = r"data/parcels_clean_duest_stu_spjoin_20240625.csv"
     PATH_DPS_LAYERS = r"data/dps_all_layers20240208.gdb"
     OUTPUT_DIR = r"data/outputs"
     OUTPUT_GDB_NAME = r"dps.gdb"  # must end in gdb
