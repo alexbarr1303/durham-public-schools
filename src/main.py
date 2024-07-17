@@ -24,6 +24,56 @@ class CONFIG:
     PATH_PARCELS = r"data/Parcels_1"
     PATH_DU_EST = r"data/parcels_clean_duest_stu_spjoin_20240625.csv"
 
+    PATH_DPS_LAYERS = r"data/dps_all_layers20240208.gdb"
+    OUTPUT_DIR = r"data/outputs"
+    OUTPUT_GDB_NAME = r"dps.gdb"  # must end in gdb
+    layer_mapping = {
+        # 'dps_all_layers_geo_id': 'base_dataset_geo_id'
+        "b2020": "geo_id_b2020",
+        "bg2020": "geo_id_bg2020",
+        "t2020": "geo_id_t2020",
+        "b2010": "geo_id_b2010",
+        "bg2010": "geo_id_bg2010",
+        "t2010": "geo_id_t2010",
+        "PU_2324_848": "pu_2324_848",
+    }
+
+    # options for aggregation functions:
+    # ['sum', 'mean', 'median', 'min', 'max', 'std']
+    block_group_aggregations = {
+        "du_est_final": ["sum", "mean"],
+        "TOTAL_PROP_VALUE": ["sum", "mean"],
+        "unit_val": ["sum", "mean"],
+        # for the census columns, values are already aggregated on the corresponding geog ids,
+        # and so, taking the mean will keep the values unchanged
+        "estimate_rent_total_bg": "mean",
+        "estimate_median_house_value_bg": "mean",
+        "estimate_median_year_structure_build_bg": "mean",
+        "estimate_housing_units_bg": "mean",
+        "pct_vacant_bg": "mean",
+        "pct_owner_occupied_bg": "mean",
+    }
+
+    tract_aggregations = {
+        "du_est_final": ["sum", "mean"],
+        "TOTAL_PROP_VALUE": ["sum", "mean"],
+        "unit_val": ["sum", "mean"],
+        # for the census columns, values are already aggregated on the corresponding geog ids,
+        # and so, taking the mean will keep the values unchanged
+        "estimate_rent_total_t": "mean",
+        "estimate_median_house_value_t": "mean",
+        "estimate_median_year_structure_build_t": "mean",
+        "estimate_housing_units_t": "mean",
+        "pct_vacant_t": "mean",
+        "pct_owner_occupied_t": "mean",
+    }
+
+    aggregations = {
+        "du_est_final": ["sum", "mean"],
+        "TOTAL_PROP_VALUE": ["sum", "mean"],
+        "unit_val": ["sum", "mean"],
+    }
+
 
 if __name__ == "__main__":
 
