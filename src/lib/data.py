@@ -197,3 +197,15 @@ def add_columns_from_census(gdf, csv, census_type="t"):
         raise ValueError
 
     return merged_csv_gdf
+
+
+def aggregate_by_geo_id(df, geo_layer, agg):
+    agg_df = df.groupby(geo_layer).agg(agg).reset_index()
+
+    # Flatten the column MultiIndex after aggregation
+    agg_df.columns = [agg_df.columns[0][0]] + [
+        "_".join(col).strip() if type(col) is tuple else col
+        for col in agg_df.columns[1:]
+    ]
+
+    return agg_df
