@@ -46,6 +46,7 @@ def clean_analytic_dataset(df):
         "pu_2324_848",
         "geo_id_t2010",
         "geo_id_t2020",
+        "region",
         "TOTAL_PROP_VALUE",
         # census t
         "estimate_rent_total_t",
@@ -77,6 +78,11 @@ def get_parcels(path):
 
 def get_du_est(path):
     du_df = pd.read_csv(path)
+
+    # Drop timestamp columns because they give trouble when writing out
+    # as a geodatabase
+    timestamp_cols = du_df.select_dtypes(include=["datetime64[ns]"]).columns
+    du_df.drop(columns=timestamp_cols, inplace=True)
     return du_df
 
 
@@ -116,6 +122,7 @@ def add_columns_from_csv(gdf, csv):
                 "pu_2324_848",
                 "geo_id_t2010",
                 "geo_id_t2020",
+                "region",
                 "TOTAL_PROP_VALUE",
             ]
         ],
@@ -131,6 +138,15 @@ def add_columns_from_csv(gdf, csv):
 
 def fix_geoid_dtypes(series):
     return series.fillna(-1).astype(int).astype(str)
+
+
+# Function to safely convert a column to int, fallback to str if it fails
+def safe_convert_to_int(df, col_name):
+    try:
+        df[col_name] = df[col_name].astype(int)
+    except ValueError:
+        df[col_name] = df[col_name].astype(str)
+    return df
 
 
 def add_columns_from_census(gdf, csv, census_type="t"):

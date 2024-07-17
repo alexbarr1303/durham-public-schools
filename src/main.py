@@ -18,6 +18,7 @@ from lib.data import (
     fix_geoid_dtypes,
     clean_analytic_dataset,
     aggregate_by_geo_id,
+    safe_convert_to_int,
 )
 
 # functions for aggregation, calculations/creating new variables
@@ -28,11 +29,21 @@ from lib.variables import process_data
 class CONFIG:
     CENSUS_YEAR = 2020
     PATH_PARCELS = r"data/Parcels_1"
-    PATH_DU_EST = r"data/parcels_clean_duest_stu_spjoin_20240625.csv"
+    PATH_DU_EST = r"data/parcels_clean_duest_stu_spjoin_20240426.csv"
 
     PATH_DPS_LAYERS = r"data/dps_all_layers20240208.gdb"
     OUTPUT_DIR = r"data/outputs"
     OUTPUT_GDB_NAME = r"dps.gdb"  # must end in gdb
+    # layer_mapping = {
+    #     # 'dps_all_layers_geo_id': 'base_dataset_geo_id'
+    #     "b2020": "geo_id_b2020",
+    #     "bg2020": "geo_id_bg2020",
+    #     "t2020": "geo_id_t2020",
+    #     "b2010": "geo_id_b2010",
+    #     "bg2010": "geo_id_bg2010",
+    #     "t2010": "geo_id_t2010",
+    #     "PU_2324_848": "pu_2324_848",
+    # }
     layer_mapping = {
         # 'dps_all_layers_geo_id': 'base_dataset_geo_id'
         "b2020": "geo_id_b2020",
@@ -42,6 +53,14 @@ class CONFIG:
         "bg2010": "geo_id_bg2010",
         "t2010": "geo_id_t2010",
         "PU_2324_848": "pu_2324_848",
+        "ES_base_2223": "sch_id_base_es",
+        "ES_zone_2223": "sch_id_zone",
+        "ES_gt_2425": "sch_id_gt_es",
+        "MS_base_2223": "sch_id_base_ms",
+        "MS_gt_2526": "sch_id_gt_ms",
+        "HS_base_2223": "sch_id_base_hs",
+        "HS_gt_2526": "sch_id_gt_hs",
+        "regions_2025_26": "region",
     }
 
     # options for aggregation functions:
@@ -127,6 +146,8 @@ if __name__ == "__main__":
     base_dataset = clean_analytic_dataset(base_dataset)
     base_dataset = process_data(base_dataset)
 
+    # base_dataset.sample(100).to_csv("data/outputs/base_dataset_sample.csv", index=None)
+
     # Join the base dataset with GDB layers ==================================
 
     for geo_layer in CONFIG.layer_mapping.keys():
@@ -163,17 +184,25 @@ if __name__ == "__main__":
         # ensure the datatypes of the geo id columns match before merging
         mapped_geo_col_name = CONFIG.layer_mapping[geo_layer]
         gdf.dropna(subset=mapped_geo_col_name, inplace=True)
-        gdf[mapped_geo_col_name] = gdf[mapped_geo_col_name].astype(int)
+        # gdf[mapped_geo_col_name] = gdf[mapped_geo_col_name].astype(int)
+        gdf = safe_convert_to_int(gdf, mapped_geo_col_name)
 
         base_dataset_agg.dropna(subset=mapped_geo_col_name, inplace=True)
-        base_dataset_agg[mapped_geo_col_name] = base_dataset_agg[
-            mapped_geo_col_name
-        ].astype(int)
+        # base_dataset_agg[mapped_geo_col_name] = base_dataset_agg[
+        #     mapped_geo_col_name
+        # ].astype(int)
+
+        base_dataset_agg = safe_convert_to_int(base_dataset_agg, mapped_geo_col_name)
 
         merged_gdf = gdf.merge(base_dataset_agg, how="left", on=mapped_geo_col_name)
         merged_gdf.crs = gdf.crs
 
         # merged_gdf.to_file(gdb_path, layer=geo_layer, driver="OpenFileGDB")
+
+        # Identify and convert timestamp fields to strings
+        for col in merged_gdf.columns:
+            if isinstance(merged_gdf[col].iloc[0], pd.Timestamp):
+                merged_gdf[col] = merged_gdf[col].astype(str)
 
         # Convert the GeoDataFrame to a dict format compatible with fiona
         schema = {
