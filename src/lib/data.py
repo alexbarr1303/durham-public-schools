@@ -1,9 +1,12 @@
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 
 
-def clean_analytic_dataset(df):
-
+def subset_analytic_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Function to keep a pre-determined set of columns.
+    """
     subset_list = [
         # durham open
         "OBJECTID_1",
@@ -71,23 +74,60 @@ def clean_analytic_dataset(df):
     return df_output
 
 
-def get_parcels(path):
+def mean_and_round(x: pd.Series) -> float:
+    """
+    Function to return rounded mean.
+    """
+    if np.isnan(x.mean()):
+        return np.nan
+    else:
+        return round(x.mean())
+
+
+def get_parcels(path: str) -> gpd.GeoDataFrame:
+    """
+    Function to read in parcel data downloaded from Durham Open.
+    This can be changed to download the data programatically from
+    https://live-durhamnc.opendata.arcgis.com/datasets/da3d194d1e2e4c37afa851b46e29a3f6_0/explore
+
+    The data needs to be downloaded as a shapefile, the path to which can be
+    provided in the main script CONFIG.
+    """
     parcels_df = gpd.read_file(path)
     return parcels_df
 
 
-def get_du_est(path):
+def get_du_est(path: str) -> pd.DataFrame:
+    """
+    Function to read in the cleaned parcels file from DPS. This should have
+    the estimated unit counts per parcel.
+    """
     du_df = pd.read_csv(path)
-
-    # Drop timestamp columns because they give trouble when writing out
-    # as a geodatabase
-    timestamp_cols = du_df.select_dtypes(include=["datetime64[ns]"]).columns
-    du_df.drop(columns=timestamp_cols, inplace=True)
     return du_df
 
 
-def add_columns_from_csv(gdf, csv):
+def convert_datetime_to_str(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert all datetime columns in a pandas DataFrame to string format.
 
+    Parameters:
+    df (pandas.DataFrame): The DataFrame to process.
+
+    Returns:
+    pandas.DataFrame: The DataFrame with datetime columns converted to strings.
+    """
+    datetime_cols = df.select_dtypes(
+        include=["datetime64[ns]", "datetime64[ns, UTC]"]
+    ).columns
+    for col in datetime_cols:
+        df[col] = df[col].astype(str)
+    return df
+
+
+def add_columns_from_csv(gdf: gpd.GeoDataFrame, csv: pd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    Function to merge the Durham Open parcel data and the DPS parcel date on REID.
+    """
     gdf["REID"] = gdf["REID"].astype(str)
     csv["REID"] = csv["REID"].astype(str)
 
@@ -136,12 +176,19 @@ def add_columns_from_csv(gdf, csv):
     return merged_csv_gdf
 
 
-def fix_geoid_dtypes(series):
+def fix_geoid_dtypes(series: pd.Series) -> pd.Series:
+    """
+    Function to convert a column series to str.
+    GeoIDs need to be in str instead of integer.
+    """
     return series.fillna(-1).astype(int).astype(str)
 
 
 # Function to safely convert a column to int, fallback to str if it fails
-def safe_convert_to_int(df, col_name):
+def safe_convert_to_int(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
+    """
+    Function to convert column to type integer. If error, convert to str.
+    """
     try:
         df[col_name] = df[col_name].astype(int)
     except ValueError:
@@ -149,8 +196,15 @@ def safe_convert_to_int(df, col_name):
     return df
 
 
-def add_columns_from_census(gdf, csv, census_type="t"):
+def add_columns_from_census(
+    gdf: gpd.GeoDataFrame, csv: pd.DataFrame, census_type: str = "t"
+) -> gpd.GeoDataFrame:
+    """
+    Function to add census columns.
 
+    Parameters:
+    census_type: One of "t", "b", "bg", for tract, block and block group.
+    """
     census_col_list = [
         "GEOID",
         "estimate_rent_total",
@@ -165,48 +219,36 @@ def add_columns_from_census(gdf, csv, census_type="t"):
     csv = csv[census_col_list]
 
     if census_type == "t":
-
         csv = csv.add_suffix("_t")
-
         merged_csv_gdf = gdf.merge(
             csv,
             left_on="geo_id_t2020",
             right_on="GEOID_t",
             how="left",
         )
-
         merged_csv_gdf.drop(columns="GEOID_t", inplace=True)
-
         pass
 
     elif census_type == "b":
-
         csv = csv.add_suffix("_b")
-
         merged_csv_gdf = gdf.merge(
             csv,
             left_on="geo_id_b2020",
             right_on="GEOID_b",
             how="left",
         )
-
         merged_csv_gdf.drop(columns="GEOID_b", inplace=True)
-
         pass
 
     elif census_type == "bg":
-
         csv = csv.add_suffix("_bg")
-
         merged_csv_gdf = gdf.merge(
             csv,
             left_on="geo_id_bg2020",
             right_on="GEOID_bg",
             how="left",
         )
-
         merged_csv_gdf.drop(columns="GEOID_bg", inplace=True)
-
         pass
 
     else:
@@ -215,7 +257,12 @@ def add_columns_from_census(gdf, csv, census_type="t"):
     return merged_csv_gdf
 
 
-def aggregate_by_geo_id(df, geo_layer, agg):
+def aggregate_by_geo_id(
+    df: gpd.GeoDataFrame, geo_layer: str, agg: dict
+) -> gpd.GeoDataFrame:
+    """
+    Function to aggregate the geo dataframe by a certain geography encoded in geo_layer.
+    """
     agg_df = df.groupby(geo_layer).agg(agg).reset_index()
 
     # Flatten the column MultiIndex after aggregation

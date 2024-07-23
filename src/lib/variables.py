@@ -1,8 +1,12 @@
+import geopandas as gpd
 import pandas as pd
 import numpy as np
 
 
-def process_data(df):
+def process_data(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Function to calculate additional columns.
+    """
     # Calculate unit value and add as a new column
     df["unit_val"] = df["TOTAL_PROP_VALUE"] / df["du_est_final"]
 
