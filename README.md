@@ -4,11 +4,13 @@
 
 This python script performs real-time downloading of [Durham Open Parcel Data](https://live-durhamnc.opendata.arcgis.com/) and Census data which is then filtered for parcels containing Durham Public School students. The script then aggregates this filtered parcel data by 15 different geographies and imports it to an interactive QGIS dashboard, where users have access to 12 different socieconomic status indicators.
 
+![image](https://github.com/user-attachments/assets/deb901f5-4349-4550-a5e0-18e0572d3e4f)
+
 ## Authors
 
 - [Dhaval Potdar](https://github.com/dhavalpotdar)
 - [Alex Barroso](https://github.com/alexbarr1303)
-- 
+
 ## Required Installations
 
 - R Installation
