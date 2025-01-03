@@ -16,10 +16,6 @@ This python script performs real-time downloading of [Durham Open Parcel Data](h
 - R Installation
 - Tidyverse
 - Tidycensus
-- 
-
-## Instructions
--
 
 
 
